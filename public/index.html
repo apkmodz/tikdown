@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Media Suite - by yas𖣂</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .radial-glow {
+            background: radial-gradient(circle at 50% -20%, rgba(244, 63, 94, 0.18) 0%, rgba(15, 23, 42, 0) 70%), #0b0f19;
+        }
+    </style>
+</head>
+<body class="radial-glow text-slate-100 min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800/80 backdrop-blur-md sticky top-0 z-50 bg-[#0b0f19]/80">
+        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                <span class="font-extrabold tracking-tight text-white text-base">TIKTOK<span class="text-rose-500">SAVER</span></span>
+            </div>
+            <div class="text-xs font-semibold px-3 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full mono">
+                credit: yas𖣂
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-2xl mx-auto px-4 py-10 flex-1 w-full flex flex-col items-center">
+        
+        <div class="text-center space-y-2 mb-8">
+            <h1 class="text-3xl font-extrabold tracking-tight text-white">
+                TikTok Downloader & <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-amber-400">Slideshow Render</span>
+            </h1>
+            <p class="text-xs text-slate-400">
+                Unduh Video Tanpa Watermark, Audio MP3, atau Render Slideshow Foto langsung di browser.
+            </p>
+        </div>
+
+        <!-- Input Box -->
+        <div class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-3 shadow-2xl backdrop-blur-xl">
+            <div class="relative flex items-center">
+                <input 
+                    type="text" 
+                    id="urlInput"
+                    placeholder="Tempel tautan TikTok di sini..."
+                    class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl px-4 py-3.5 pr-28 text-xs focus:outline-none focus:border-rose-500 transition-colors text-white placeholder-slate-500 mono"
+                />
+                <div class="absolute right-2 flex items-center space-x-1.5">
+                    <button id="pasteBtn" class="text-xs px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-all border border-slate-700 font-medium">
+                        Paste
+                    </button>
+                    <button id="processBtn" class="text-xs px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-lg shadow-lg shadow-rose-600/30 transition-all">
+                        Proses
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center justify-between mt-3 px-1">
+                <label class="flex items-center space-x-2 text-[11px] text-slate-400 cursor-pointer select-none">
+                    <input type="checkbox" id="autoPasteCheck" checked class="rounded border-slate-700 text-rose-600 focus:ring-0 bg-slate-950">
+                    <span>Auto-paste saat kembali ke halaman</span>
+                </label>
+                <span id="statusIndicator" class="text-[11px] text-slate-500 mono">Siap</span>
+            </div>
+        </div>
+
+        <!-- Alert Error -->
+        <div id="errorAlert" class="hidden w-full mt-4 p-3.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-xs mono"></div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingBox" class="hidden w-full mt-8 p-8 border border-slate-800 rounded-2xl bg-slate-900/40 text-center space-y-3">
+            <div class="w-7 h-7 border-2 border-rose-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p class="text-xs text-slate-400 mono">Mengekstrak stream media tanpa watermark...</p>
+        </div>
+
+        <!-- Hasil Pemrosesan -->
+        <div id="resultCard" class="hidden w-full mt-6 bg-slate-900/70 border border-slate-800 rounded-2xl p-5 backdrop-blur-md">
+            
+            <div class="flex items-center space-x-3.5 border-b border-slate-800 pb-4">
+                <img id="authorAvatar" class="w-11 h-11 rounded-full border border-slate-700 object-cover" src="" alt="Avatar">
+                <div class="overflow-hidden">
+                    <h2 id="authorName" class="font-bold text-xs text-white truncate"></h2>
+                    <p id="contentTitle" class="text-[11px] text-slate-400 truncate mt-0.5"></p>
+                </div>
+            </div>
+
+            <!-- Tipe Video Biasa -->
+            <div id="videoSection" class="hidden mt-5 space-y-4">
+                <div class="rounded-xl overflow-hidden bg-black max-h-80 flex items-center justify-center">
+                    <video id="videoPlayer" controls class="max-h-80 w-auto mx-auto"></video>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <a id="downloadVideoBtn" href="#" target="_blank" download="tiktok_no_wm.mp4" 
+                       class="text-center py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-rose-600/20 transition-all block">
+                        Download Video (No WM)
+                    </a>
+                    <a id="downloadAudioBtn" href="#" target="_blank" download="tiktok_audio.mp3" 
+                       class="text-center py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold transition-all block">
+                        Download Audio (MP3)
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tipe Slideshow -->
+            <div id="slideshowSection" class="hidden mt-5 space-y-5">
+                <div>
+                    <div class="flex justify-between items-center mb-2.5">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400 mono" id="slideCount">Slideshow</span>
+                    </div>
+                    <div id="slideshowGallery" class="flex gap-2 overflow-x-auto pb-3"></div>
+                </div>
+
+                <!-- Modul Render Slideshow ke Video -->
+                <div class="p-4 bg-slate-950/70 border border-slate-800 rounded-xl space-y-3.5">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div>
+                            <h3 class="text-xs font-bold text-white uppercase tracking-wider">Render Slideshow ke Video</h3>
+                            <p class="text-[11px] text-slate-400">Dirender langsung di browser tanpa batas Vercel.</p>
+                        </div>
+                        <div class="text-[11px] bg-slate-800 px-2.5 py-1 rounded border border-slate-700 text-amber-400 mono" id="soundDurationInfo">
+                            Deteksi Audio: Menghitung...
+                        </div>
+                    </div>
+
+                    <!-- Pilihan Durasi -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button type="button" class="duration-opt active py-2 rounded-lg text-xs font-medium border border-rose-500 bg-rose-500/10 text-rose-400" data-val="auto">Auto Sound</button>
+                        <button type="button" class="duration-opt py-2 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-400" data-val="15">15 Detik</button>
+                        <button type="button" class="duration-opt py-2 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900 text-slate-400" data-val="30">30 Detik</button>
+                        <input type="number" id="customDuration" placeholder="Custom (dtk)" min="3" max="120" class="py-2 px-2 rounded-lg text-xs bg-slate-900 border border-slate-800 text-white text-center focus:outline-none focus:border-rose-500">
+                    </div>
+
+                    <button id="startRenderBtn" class="w-full py-2.5 bg-gradient-to-r from-rose-600 to-amber-600 hover:opacity-95 text-white font-semibold rounded-xl text-xs transition-all shadow-lg">
+                        Mulai Render Video
+                    </button>
+
+                    <!-- Render Progress -->
+                    <div id="renderProgress" class="hidden space-y-2">
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                            <div id="progressBar" class="bg-rose-500 h-full w-0 transition-all duration-100"></div>
+                        </div>
+                        <p id="renderStatusText" class="text-center text-[11px] text-slate-400 mono">Memuat aset media...</p>
+                    </div>
+                </div>
+
+                <a id="downloadSlideAudioBtn" href="#" target="_blank" download="tiktok_audio.mp3" 
+                   class="text-center py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold block">
+                    Download Audio Original (MP3)
+                </a>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Hidden Canvas untuk Video Synthesizer -->
+    <canvas id="renderCanvas" width="1080" height="1920" class="hidden"></canvas>
+
+    <!-- Footer Credit -->
+    <footer class="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
+        <p>All website credit is by <span class="text-slate-300 font-semibold">yas𖣂</span></p>
+    </footer>
+
+    <script>
+        const urlInput = document.getElementById('urlInput');
+        const pasteBtn = document.getElementById('pasteBtn');
+        const processBtn = document.getElementById('processBtn');
+        const autoPasteCheck = document.getElementById('autoPasteCheck');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const errorAlert = document.getElementById('errorAlert');
+        const loadingBox = document.getElementById('loadingBox');
+        const resultCard = document.getElementById('resultCard');
+
+        const videoSection = document.getElementById('videoSection');
+        const slideshowSection = document.getElementById('slideshowSection');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const downloadVideoBtn = document.getElementById('downloadVideoBtn');
+        const downloadAudioBtn = document.getElementById('downloadAudioBtn');
+        const downloadSlideAudioBtn = document.getElementById('downloadSlideAudioBtn');
+        const slideshowGallery = document.getElementById('slideshowGallery');
+        const soundDurationInfo = document.getElementById('soundDurationInfo');
+        const startRenderBtn = document.getElementById('startRenderBtn');
+        const renderProgress = document.getElementById('renderProgress');
+        const progressBar = document.getElementById('progressBar');
+        const renderStatusText = document.getElementById('renderStatusText');
+        const customDuration = document.getElementById('customDuration');
+        const canvas = document.getElementById('renderCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let currentPayload = null;
+        let detectedSoundSeconds = 0;
+        let selectedDurationType = 'auto';
+
+        const TIKTOK_URL_REGEX = /https?:\/\/(?:www\.|v[mt]\.|vm\.)?tiktok\.com\/[^\s]+/;
+
+        function showError(msg) {
+            errorAlert.textContent = msg;
+            errorAlert.classList.remove('hidden');
+            loadingBox.classList.add('hidden');
+        }
+
+        function clearError() {
+            errorAlert.textContent = '';
+            errorAlert.classList.add('hidden');
+        }
+
+        async function processTikTokUrl(url) {
+            if (!TIKTOK_URL_REGEX.test(url)) return;
+            
+            clearError();
+            resultCard.classList.add('hidden');
+            loadingBox.classList.remove('hidden');
+            statusIndicator.textContent = 'Memproses...';
+
+            try {
+                const res = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url.trim() })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Gagal memproses URL');
+
+                currentPayload = data;
+                renderOutput(data);
+                statusIndicator.textContent = 'Selesai';
+            } catch (err) {
+                showError(err.message);
+                statusIndicator.textContent = 'Gagal';
+            } finally {
+                loadingBox.classList.add('hidden');
+            }
+        }
+
+        function renderOutput(data) {
+            document.getElementById('authorAvatar').src = data.author.avatar;
+            document.getElementById('authorName').textContent = `${data.author.nickname} (@${data.author.unique_id})`;
+            document.getElementById('contentTitle').textContent = data.title;
+
+            if (data.type === 'video') {
+                slideshowSection.classList.add('hidden');
+                videoSection.classList.remove('hidden');
+                videoPlayer.src = data.video;
+                downloadVideoBtn.href = data.video;
+                downloadAudioBtn.href = data.music.url;
+            } else {
+                videoSection.classList.add('hidden');
+                slideshowSection.classList.remove('hidden');
+                downloadSlideAudioBtn.href = data.music.url;
+                
+                document.getElementById('slideCount').textContent = `Foto Slideshow (${data.images.length})`;
+                slideshowGallery.innerHTML = '';
+                
+                data.images.forEach((img, idx) => {
+                    const el = document.createElement('div');
+                    el.className = 'flex-shrink-0 relative group';
+                    el.innerHTML = `
+                        <img src="/api/proxy?url=${encodeURIComponent(img)}" class="w-24 h-36 object-cover rounded-lg border border-slate-800">
+                        <a href="/api/proxy?url=${encodeURIComponent(img)}" target="_blank" download="slide_${idx+1}.jpg" class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white font-medium rounded-lg transition-opacity">
+                            Unduh
+                        </a>
+                    `;
+                    slideshowGallery.appendChild(el);
+                });
+
+                // Deteksi presisi durasi file audio asli
+                detectAudioDuration(data.music.url, data.music.duration);
+            }
+
+            resultCard.classList.remove('hidden');
+        }
+
+        function detectAudioDuration(audioUrl, fallbackDuration) {
+            soundDurationInfo.textContent = "Mendeteksi durasi audio...";
+            detectedSoundSeconds = fallbackDuration || 15;
+
+            const tempAudio = new Audio();
+            tempAudio.src = `/api/proxy?url=${encodeURIComponent(audioUrl)}`;
+            tempAudio.addEventListener('loadedmetadata', () => {
+                if (tempAudio.duration && !isNaN(tempAudio.duration)) {
+                    detectedSoundSeconds = Math.round(tempAudio.duration);
+                    soundDurationInfo.textContent = `Durasi Audio: ${detectedSoundSeconds} dtk`;
+                }
+            });
+            tempAudio.addEventListener('error', () => {
+                soundDurationInfo.textContent = `Durasi Audio: ${detectedSoundSeconds} dtk (estimasi)`;
+            });
+        }
+
+        // Auto-Paste Engine
+        async function checkClipboard() {
+            if (!autoPasteCheck.checked) return;
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text && TIKTOK_URL_REGEX.test(text) && text !== urlInput.value) {
+                    urlInput.value = text;
+                    processTikTokUrl(text);
+                }
+            } catch (_) {}
+        }
+
+        window.addEventListener('focus', checkClipboard);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') checkClipboard();
+        });
+
+        pasteBtn.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                urlInput.value = text;
+                processTikTokUrl(text);
+            } catch (err) {
+                showError('Izin clipboard ditolak. Silakan tempel secara manual.');
+            }
+        });
+
+        processBtn.addEventListener('click', () => processTikTokUrl(urlInput.value));
+        urlInput.addEventListener('input', (e) => {
+            if (TIKTOK_URL_REGEX.test(e.target.value)) {
+                processTikTokUrl(e.target.value);
+            }
+        });
+
+        // Kontrol Opsi Durasi
+        document.querySelectorAll('.duration-opt').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.duration-opt').forEach(b => {
+                    b.classList.remove('border-rose-500', 'bg-rose-500/10', 'text-rose-400');
+                    b.classList.add('border-slate-800', 'bg-slate-900', 'text-slate-400');
+                });
+                btn.classList.add('border-rose-500', 'bg-rose-500/10', 'text-rose-400');
+                btn.classList.remove('border-slate-800', 'bg-slate-900', 'text-slate-400');
+                selectedDurationType = btn.getAttribute('data-val');
+                customDuration.value = '';
+            });
+        });
+
+        customDuration.addEventListener('focus', () => {
+            document.querySelectorAll('.duration-opt').forEach(b => {
+                b.classList.remove('border-rose-500', 'bg-rose-500/10', 'text-rose-400');
+                b.classList.add('border-slate-800', 'bg-slate-900', 'text-slate-400');
+            });
+            selectedDurationType = 'custom';
+        });
+
+        // Client-Side Canvas Video Synthesizer (Zero Vercel Timeout)
+        startRenderBtn.addEventListener('click', async () => {
+            if (!currentPayload || currentPayload.type !== 'slideshow') return;
+
+            let totalSeconds = 15;
+            if (selectedDurationType === 'auto') {
+                totalSeconds = detectedSoundSeconds > 0 ? detectedSoundSeconds : 15;
+            } else if (selectedDurationType === 'custom') {
+                totalSeconds = Math.max(3, parseFloat(customDuration.value) || 15);
+            } else {
+                totalSeconds = parseFloat(selectedDurationType);
+            }
+
+            startRenderBtn.disabled = true;
+            renderProgress.classList.remove('hidden');
+            progressBar.style.width = '0%';
+            renderStatusText.textContent = 'Mengunduh gambar...';
+
+            try {
+                // 1. Muat semua gambar ke memori browser
+                const loadedImages = await Promise.all(
+                    currentPayload.images.map((imgUrl) => {
+                        return new Promise((resolve, reject) => {
+                            const img = new Image();
+                            img.crossOrigin = 'anonymous';
+                            img.onload = () => resolve(img);
+                            img.onerror = () => reject(new Error('Gagal memuat salah satu frame gambar.'));
+                            img.src = `/api/proxy?url=${encodeURIComponent(imgUrl)}`;
+                        });
+                    })
+                );
+
+                renderStatusText.textContent = 'Menyiapkan audio soundtrack...';
+
+                // 2. Siapkan Web Audio API
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const audioDest = audioCtx.createMediaStreamDestination();
+
+                const audioRes = await fetch(`/api/proxy?url=${encodeURIComponent(currentPayload.music.url)}`);
+                const audioBuffer = await audioCtx.decodeAudioData(await audioRes.arrayBuffer());
+                
+                const audioSource = audioCtx.createBufferSource();
+                audioSource.buffer = audioBuffer;
+                audioSource.connect(audioDest);
+
+                // 3. Gabungkan Stream Canvas dan Audio
+                const canvasStream = canvas.captureStream(30); // 30 FPS
+                const audioTrack = audioDest.stream.getAudioTracks()[0];
+                if (audioTrack) canvasStream.addTrack(audioTrack);
+
+                const mimeType = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
+                const recorder = new MediaRecorder(canvasStream, { mimeType });
+                const chunks = [];
+
+                recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+                recorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: mimeType });
+                    const fileUrl = URL.createObjectURL(blob);
+                    const ext = mimeType === 'video/mp4' ? 'mp4' : 'webm';
+
+                    const a = document.createElement('a');
+                    a.href = fileUrl;
+                    a.download = `slideshow_rendered_yas.${ext}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+
+                    renderStatusText.textContent = 'Render selesai! File otomatis terunduh.';
+                    startRenderBtn.disabled = false;
+                };
+
+                // 4. Jalankan Perekaman & Animasi Frame
+                recorder.start();
+                audioSource.start();
+
+                const startTime = performance.now();
+                const totalMs = totalSeconds * 1000;
+                const msPerImage = totalMs / loadedImages.length;
+
+                function drawFrame(now) {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(100, (elapsed / totalMs) * 100);
+                    progressBar.style.width = `${progress}%`;
+                    renderStatusText.textContent = `Merender video: ${Math.round(elapsed / 1000)}s / ${totalSeconds}s (${Math.round(progress)}%)`;
+
+                    // Tentukan gambar yang aktif
+                    const imageIdx = Math.min(loadedImages.length - 1, Math.floor(elapsed / msPerImage));
+                    const currentImg = loadedImages[imageIdx];
+
+                    // Render background hitam vertikal (1080 x 1920)
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, 0, 1080, 1920);
+
+                    // Gambar di-skalakan proporsional (contain)
+                    const hRatio = 1080 / currentImg.width;
+                    const vRatio = 1920 / currentImg.height;
+                    const ratio = Math.min(hRatio, vRatio);
+                    const centerShiftX = (1080 - currentImg.width * ratio) / 2;
+                    const centerShiftY = (1920 - currentImg.height * ratio) / 2;
+
+                    ctx.drawImage(
+                        currentImg, 
+                        0, 0, currentImg.width, currentImg.height,
+                        centerShiftX, centerShiftY, currentImg.width * ratio, currentImg.height * ratio
+                    );
+
+                    if (elapsed < totalMs) {
+                        requestAnimationFrame(drawFrame);
+                    } else {
+                        audioSource.stop();
+                        recorder.stop();
+                        audioCtx.close();
+                    }
+                }
+
+                requestAnimationFrame(drawFrame);
+
+            } catch (err) {
+                showError('Gagal merender video: ' + err.message);
+                startRenderBtn.disabled = false;
+                renderProgress.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
